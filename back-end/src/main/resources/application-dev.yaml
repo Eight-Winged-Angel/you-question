@@ -14,10 +14,10 @@ spring:
 #      file-size-threshold: 1MB
   datasource:
     username: root
-    password: 20220411.hhd
-    url: jdbc:mysql://bj-cynosdbmysql-grp-cf914sze.sql.tencentcdb.com:23116/learning?serverTimezone=UTC&allowMultiQueries=true
+    password: xxxxxxxxxxxxxx
+    url: xxxxxxx
     driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
+    type: xxxxxxxxxxxx
     ##像druid这种外来的数据源（或其他），在配置文件中不会自动提示，写好后yaml read报错，则需要检查是不是空格有不符合要求！！！！（导致报错，可以和有提示的语句相对齐）
 #    initialSize: 5
 #    minIdle: 5
@@ -41,9 +41,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   mail:
-    host: smtp.qq.com
-    username: icy_bot@qq.com
-    password: epsiulrygwrafidg
+    host: xxxxxxxxxxxxxx
+    username: xxxxxxxxxxxx
+    password: xxxxxxxxxxx
     properties:
       mail:
         smtp:
@@ -70,19 +70,19 @@ server:
 #SpringBoot项目报错：java.lang.IllegalStateException: Failed to load ApplicationContext
 #token:
 #  header: Authorization #令牌自定义标识
-#  secret: wuhaoxuanxuwenliangyanshuoyanzhenyuyezhengye #令牌密钥
+#  secret: xxxxxxxxxxxxxxxx #令牌密钥
 #  expireTime: 30 #令牌有效期 默认30分钟
 
 #  短信api
 tencent-sms:
-  secretId: AKIDmOnxrWw85nOsAE5lEYhgT2RktqcNwISQ
-  secretKey: rWzHRRIyT1Tp1ziCRTGn7E6k9KHzOvJc
-  region: ap-nanjing
-  sdkAppId: 1400724888
-  signName: 惬意的小树屋个人网
-  templateId: 1516711
+  secretId: xxxxxxxxxxxxx
+  secretKey: xxxxxxxxxxxxxx
+  region: ap-xxxxxxxxxxxx
+  sdkAppId: xxxxxxxxxx
+  signName: xxxxxxxxxxxxx
+  templateId: xxxxxxxxx
   enabled: true
 
 #  JWT令牌加密
 jwt:
-  private-key: lean.cupk.edu.cn
+  private-key: xxxxxxxxxxxxxx
