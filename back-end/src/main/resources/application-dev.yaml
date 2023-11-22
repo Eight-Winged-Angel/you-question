@@ -1,0 +1,88 @@
+spring:
+#  servlet:
+#    multipart:
+#      enabled: true
+#      # 不限制文件大小
+#      max-file-size: -1
+#      # 不限制请求体大小
+#      max-request-size: -1
+#      # 临时IO目录
+#      location: "${java.io.tmpdir}"
+#      # 不延迟解析
+#      resolve-lazily: false
+#      #  超过1Mb，就IO到临时目录
+#      file-size-threshold: 1MB
+  datasource:
+    username: root
+    password: 20220411.hhd
+    url: jdbc:mysql://bj-cynosdbmysql-grp-cf914sze.sql.tencentcdb.com:23116/learning?serverTimezone=UTC&allowMultiQueries=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    ##像druid这种外来的数据源（或其他），在配置文件中不会自动提示，写好后yaml read报错，则需要检查是不是空格有不符合要求！！！！（导致报错，可以和有提示的语句相对齐）
+#    initialSize: 5
+#    minIdle: 5
+#    maxActive: 20
+#    maxWait: 60000
+#    timeBetweenEvictionRunsMillis: 60000
+#    minEvictableIdleTimeMillis: 300000
+#    validationQuery: SELECT 1 FROM DUAL
+#    testWhileIdle: true
+#    testOnBorrow: false
+#    testOnReturn: false
+#    poolPreparedStatements: true
+    #配置监控统计拦截的filters，stat：监控统计、log4j：日志记录、wall：防御sql注入
+    #如果允许报错，java.lang.ClassNotFoundException: org.apache.Log4j.Properity
+    #则导入log4j 依赖就行
+#    filters: stat,wall,log4j
+#    maxPoolPreparedStatementPerConnectionSize: 20
+#    useGlobalDataSourceStat: true
+#    connectionoProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  mail:
+    host: smtp.qq.com
+    username: icy_bot@qq.com
+    password: epsiulrygwrafidg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+          required: true
+  redis:
+    host: localhost
+    port: 6379
+#整合mybatis（这相对于mybatis的配置文件（不同于mapper的））
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  #保证在mapper里面写实体类 不用写完整的包名
+  type-aliases-package: cn.edu.cupk.learn.common.entity
+
+  #mapper的配置文件的所在地(注意 一开始就/ 是代表的根目录，不加就是 resources目录)
+  mapper-locations: classpath:mapper/*.xml
+
+#application.yaml文件不要在.properties上直接修改,会报错！
+#SpringBoot报错：Caused by: org.yaml.snakeyaml.error.YAMLException: java.nio.charset.Malforme
+server:
+  port: 14514
+#SpringBoot项目报错：java.lang.IllegalStateException: Failed to load ApplicationContext
+#token:
+#  header: Authorization #令牌自定义标识
+#  secret: wuhaoxuanxuwenliangyanshuoyanzhenyuyezhengye #令牌密钥
+#  expireTime: 30 #令牌有效期 默认30分钟
+
+#  短信api
+tencent-sms:
+  secretId: AKIDmOnxrWw85nOsAE5lEYhgT2RktqcNwISQ
+  secretKey: rWzHRRIyT1Tp1ziCRTGn7E6k9KHzOvJc
+  region: ap-nanjing
+  sdkAppId: 1400724888
+  signName: 惬意的小树屋个人网
+  templateId: 1516711
+  enabled: true
+
+#  JWT令牌加密
+jwt:
+  private-key: lean.cupk.edu.cn

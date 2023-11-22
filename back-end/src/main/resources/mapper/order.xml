@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cupk.learn.repository.bank.OrderRepository">
+    <insert id="copy">
+        INSERT INTO
+            t_order (practice_id, question_order, question_score, question_id)
+            SELECT
+                   #{new}, question_order, question_score, question_id
+            FROM
+                 t_order
+            WHERE
+                 practice_id = #{old}
+    </insert>
+</mapper>

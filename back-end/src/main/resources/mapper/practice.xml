@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cupk.learn.repository.bank.PracticeRepository">
+
+    <resultMap id="bankPractice" type="cn.edu.cupk.learn.common.domain.bank.BankPractice">
+        <id property="practiceId" column="practice_id"/>
+        <result property="title" column="practice_title"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="startTime" column="start_time"/>
+        <result property="timeLimit" column="time_limit"/>
+        <result property="endTime" column="end_time"/>
+        <result property="courseId" column="course_id"/>
+        <result property="inviteCode" column="invite_code"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="content" column="practice_content"/>
+        <result property="count" column="COUNT"/>
+        <result property="score" column="SUM"/>
+    </resultMap>
+
+    <resultMap id="studentQuestion" type="cn.edu.cupk.learn.common.domain.course.StudentQuestion">
+        <result property="id" column="question_id"/>
+        <result property="score" column="question_score"/>
+        <result property="type" column="question_type"/>
+        <result property="content" column="question_content"/>
+        <result property="answer" column="answer_submit"/>
+        <collection property="options" column="question_id" select="selectOption"/>
+    </resultMap>
+
+    <resultMap id="option" type="cn.edu.cupk.learn.common.entity.KeyPO">
+        <result property="keyId" column="key_id"/>
+        <result property="content" column="answer_content"/>
+    </resultMap>
+
+    <select id="selectQuestionStudent" resultMap="studentQuestion">
+        SELECT
+               q.question_id, q.question_content, q.question_type,
+               o.question_score, s.answer_submit, o.question_order
+        FROM t_order o
+        LEFT JOIN t_question_submit s
+            ON o.question_id = s.question_id
+            AND s.user_id = ${studentId}
+            AND o.practice_id = s.practice_id
+        LEFT JOIN t_question q
+            ON q.question_id = o.question_id
+        WHERE
+            o.practice_id = ${practiceId}
+        ORDER BY o.question_order
+    </select>
+
+    <select id="selectOption" resultMap="option">
+        SELECT
+               k.key_id, k.answer_content
+        FROM
+             t_question_key k, t_question q
+        WHERE
+            k.question_id = ${question_id}
+            AND q.question_id = k.question_id
+            AND q.question_type IN (1, 2)
+    </select>
+
+    <select id="existsInviteCode" resultType="java.lang.Boolean">
+        SELECT COUNT(*)
+        FROM t_practice
+        WHERE invite_code = #{inviteCode}
+    </select>
+
+    <select id="selectAllWithIntro" resultMap="bankPractice">
+        SELECT
+            DISTINCT p.practice_id, p.practice_title, p.create_time, p.update_time, p.start_time, p.time_limit,
+            p.end_time, p.course_id, p.invite_code, p.teacher_id, p.practice_content,
+            COUNT(o.question_id) COUNT, SUM(o.question_score) SUM
+        FROM
+            t_practice p
+        LEFT JOIN
+            t_order o
+        ON
+            p.practice_id = o.practice_id
+        <where>
+            <if test="keyWord != null and keyWord != ''">
+                LOCATE(#{keyWord}, p.practice_title)
+            </if>
+        </where>
+        GROUP BY
+            p.practice_id, p.update_time
+        ORDER BY
+            p.update_time
+    </select>
+
+    <select id="selectByInviteCode" resultType="cn.edu.cupk.learn.common.entity.bank.PracticePO">
+        SELECT
+               practice_id, practice_title, create_time, update_time, start_time, time_limit, end_time, course_id,
+               invite_code, teacher_id, practice_content
+        FROM
+             t_practice
+        WHERE
+              invite_code = #{inviteCode}
+    </select>
+
+    <select id="pageByCourse" resultMap="bankPractice">
+        SELECT
+            DISTINCT p.practice_id, p.practice_title, p.create_time, p.update_time, p.start_time, p.time_limit,
+            p.end_time, p.course_id, p.invite_code, p.teacher_id, p.practice_content,
+            COUNT(o.question_id) COUNT, SUM(o.question_score) SUM
+        FROM
+            t_practice p
+        LEFT JOIN
+            t_order o
+        ON
+            p.practice_id = o.practice_id
+        WHERE
+            p.course_id = ${courseId}
+        GROUP BY
+            p.practice_id, p.update_time
+        ORDER BY
+            p.update_time
+    </select>
+
+    <select id="selectByInviteWithIntro" resultMap="bankPractice">
+        SELECT
+            DISTINCT p.practice_id, p.practice_title, p.create_time, p.update_time, p.start_time, p.time_limit,
+            p.end_time, p.course_id, p.invite_code, p.teacher_id, p.practice_content,
+            COUNT(o.question_id) COUNT, SUM(o.question_score) SUM
+        FROM
+            t_practice p
+        LEFT JOIN
+            t_order o
+        ON
+            p.practice_id = o.practice_id
+        WHERE
+            p.invite_code = #{inviteCode}
+        GROUP BY
+            p.practice_id
+    </select>
+
+</mapper>

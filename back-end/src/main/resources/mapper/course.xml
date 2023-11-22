@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cupk.learn.repository.course.CourseRepository">
+
+    <resultMap id="listVO" type="cn.edu.cupk.learn.common.vo.course.CourseListVO">
+        <id property="courseId" column="course_id"/>
+        <result property="title" column="course_title"/>
+        <!--<result property="c" column="course_image"
+                typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>-->
+        <result property="content" column="course_content"/>
+        <result property="teacher" column="user_name"/>
+    </resultMap>
+
+    <resultMap id="inviteCode" type="cn.edu.cupk.learn.common.domain.course.InviteCode">
+        <result property="courseId" column="course_id"/>
+        <result property="inviteCode" column="invite_code"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <resultMap id="student" type="cn.edu.cupk.learn.common.vo.student.StudentListVO">
+        <id property="userId" column="user_id"/>
+        <result property="name" column="user_name"/>
+        <result property="school" column="school_id"/>
+        <result property="studentId" column="student_id"/>
+    </resultMap>
+
+    <resultMap id="noticeList" type="cn.edu.cupk.learn.common.vo.notice.NoticeListVO">
+        <id property="noticeId" column="notice_id"/>
+        <result property="title" column="notice_title"/>
+        <result property="content" column="notice_content"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="practice" type="cn.edu.cupk.learn.common.domain.course.Practice">
+        <id property="practiceId" column="practice_id"/>
+        <result property="title" column="practice_title"/>
+        <result property="content" column="practice_content"/>
+        <result property="startTime" column="start_time"/>
+        <result property="timeLimit" column="time_limit"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <resultMap id="course" type="cn.edu.cupk.learn.common.domain.course.Course">
+        <id property="courseId" column="course_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="title" column="course_title"/>
+        <result property="content" column="course_content"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="inviteCode" column="invite_code"/>
+        <result property="endTime" column="end_time"/>
+        <result property="total" column="COUNT"/>
+        <result property="teacherName" column="user_name"/>
+        <result property="schoolName" column="school_name"/>
+    </resultMap>
+
+    <insert id="insertCourse">
+        INSERT INTO t_course (`course_title`, course_content, `course_image`, `teacher_id`)
+        VALUES(#{courseName}, #{courseIntroduction}, #{courseImage}, #{teacherId})
+    </insert>
+
+    <insert id="insertStudent">
+        INSERT INTO
+            t_course_user (course_id, user_id)
+        VALUES
+               (#{courseId}, #{studentId})
+    </insert>
+
+    <delete id="deleteStudent">
+        DELETE FROM t_course_user
+        WHERE course_id = #{courseId} and user_id = #{studentId}
+    </delete>
+
+    <delete id="deleteAllStudent">
+        DELETE FROM t_course_user
+        WHERE course_id = #{courseId}
+    </delete>
+
+    <update id="updateCourse">
+        UPDATE t_course
+        <trim prefix="set" suffixOverrides=",">
+            <if test="title != null"> course_title = #{title},</if>
+            <if test="content != null">course_content = #{content}</if>
+        </trim>
+        WHERE course_id = #{courseId}
+    </update>
+
+    <select id="existByInviteCode" resultType="java.lang.Boolean">
+        SELECT COUNT(*)
+        FROM t_course
+        WHERE invite_code = #{inviteCode}
+    </select>
+
+    <select id="pageListByStudent" resultMap="listVO">
+        SELECT
+               c.course_id, c.course_title, c.course_content, u.user_name
+        FROM
+             t_course_user s
+        LEFT JOIN t_course c
+            ON s.course_id = c.course_id
+        LEFT JOIN t_user u
+            ON c.teacher_id = u.user_id
+        WHERE
+              s.user_id = #{studentId}
+    </select>
+
+    <select id="pageListByTeacher" resultMap="listVO">
+        SELECT course_id, course_title, course_image, course_content, user_name
+        FROM t_course, t_user
+        WHERE teacher_id = #{teacherId} and t_user.user_id = t_course.teacher_id
+    </select>
+
+    <select id="pageStudent" resultMap="student">
+        SELECT
+               u.user_id, u.user_name, s.school_name, u.student_id
+        FROM t_course_user cu
+        LEFT JOIN t_user u
+            ON u.user_id = cu.user_id
+        LEFT JOIN t_school s
+            ON u.school_id = s.school_id
+        <where>
+            <if test="courseId != null">
+                course_id = #{courseId}
+            </if>
+            <if test="keyWord != null and keyWord != '' and !isId">
+                AND LOCATE(#{keyWord}, u.user_name)
+            </if>
+            <if test="keyWord != null and keyWord != '' and isId">
+                AND LOCATE(#{keyWord}, u.student_id)
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDomainByInviteCode" resultMap="course">
+        SELECT
+            c.course_id, c.create_time, c.update_time, c.course_title, c.course_content, c.teacher_id, c.invite_code,
+            c.end_time, u.user_name, s.school_name, COUNT(cu.user_id) COUNT
+        FROM
+            t_course c
+                LEFT JOIN t_user u
+                          ON c.teacher_id = u.user_id
+                LEFT JOIN t_school s
+                          ON u.school_id = s.school_id
+                LEFT JOIN t_course_user cu
+                          ON c.course_id = cu.course_id
+        WHERE
+            c.invite_code = #{inviteCode}
+        GROUP BY
+            c.course_id
+    </select>
+
+    <select id="selectAllNoticeList" resultMap="noticeList">
+        SELECT
+               notice_id, notice_title, notice_content, update_time
+        FROM
+             t_course_notice
+        WHERE
+              course_id = #{courseId}
+        ORDER BY update_time desc
+    </select>
+
+    <select id="pagePracticeList" resultMap="practice">
+        SELECT practice_id, practice_title, start_time, time_limit, end_time
+        FROM t_practice
+        WHERE course_id = #{courseId}
+    </select>
+
+    <select id="existsStudent" resultType="java.lang.Boolean">
+        SELECT 1
+        FROM t_course_user
+        WHERE user_id = #{studentId} AND course_id = #{courseId}
+    </select>
+
+    <delete id="deleteNotice">
+        DELETE FROM t_course_notice
+        WHERE course_id = #{courseId} and notice_id = #{noticeId}
+    </delete>
+
+    <select id="pageQuestionListByStudentId" resultMap="student">
+        SELECT user_id, user_name, school_name,student_id
+        FROM learning.t_user natural join learning.t_course_user natural join(SELECT school_id,school_name FROM learning.t_school ) as school
+        WHERE student_id like #{keyWord} and course_id = #{courseId};
+    </select>
+
+    <select id="selectDomainById" resultMap="course">
+        SELECT
+               c.course_id, c.create_time, c.update_time, c.course_title, c.course_content, c.teacher_id, c.invite_code,
+               c.end_time, u.user_name, s.school_name, COUNT(cu.user_id) COUNT
+        FROM
+             t_course c
+        LEFT JOIN t_user u
+            ON c.teacher_id = u.user_id
+        LEFT JOIN t_school s
+            ON u.school_id = s.school_id
+        LEFT JOIN t_course_user cu
+            ON c.course_id = cu.course_id
+        WHERE
+              c.course_id = ${courseId}
+    </select>
+</mapper>

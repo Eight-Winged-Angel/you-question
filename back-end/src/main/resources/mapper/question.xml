@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cupk.learn.repository.bank.QuestionRepository">
+    <resultMap id="bankKey" type="cn.edu.cupk.learn.common.entity.KeyPO">
+        <result column="key_id" property="keyId"/>
+        <result column="answer_content" property="content"/>
+        <result column="correct" property="correct"/>
+    </resultMap>
+    <resultMap id="bankQuestion" type="cn.edu.cupk.learn.common.domain.bank.BankQuestion">
+        <result column="question_id" property="id"/>
+        <result column="question_type" property="type"/>
+        <result column="question_content" property="content"/>
+        <result column="update_time" property="date"/>
+        <collection property="keys" column="question_id" select="selectQuestionKey"/>
+    </resultMap>
+    <select id="pageWithKey" resultMap="bankQuestion">
+        SELECT DISTINCT
+            q.question_id, q.create_time, q.question_type, q.question_content, q.update_time
+        FROM
+            t_question q
+        LEFT JOIN
+            t_question_key k
+        ON q.question_id = k.question_id
+        <where>
+            <if test="teacherId != null">
+                q.teacher_id = #{teacherId}
+            </if>
+            <if test="type &gt; 0 and type &lt; 100">
+                AND q.question_type = #{type}
+            </if>
+            <if test="keyWord != null and keyWord != ''">
+                AND LOCATE(#{keyWord}, q.question_content)
+            </if>
+        </where>
+        ORDER BY q.update_time DESC
+    </select>
+
+    <select id="selectQuestionKey" resultMap="bankKey">
+        SELECT
+               k.key_id, k.answer_content, k.correct
+        FROM
+             t_question_key k
+        WHERE
+              k.question_id = #{question_id}
+    </select>
+</mapper>
